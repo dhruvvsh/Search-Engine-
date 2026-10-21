@@ -1,0 +1,24 @@
+server:
+  port: 8081  # 8080 is taken by Kafka UI
+
+spring:
+  application:
+    name: fetcher
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      # All fetcher instances share this group, so Kafka splits the partitions between them.
+      group-id: fetcher
+      # A brand-new group starts from the oldest message instead of only new ones.
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      # HTML compresses well; also keeps batches under the broker's 1 MB limit.
+      compression-type: lz4
+    listener:
+      # 3 consumer threads in this one app. Each gets 2 of the 6 partitions.
+      concurrency: 3
